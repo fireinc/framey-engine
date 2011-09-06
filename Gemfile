@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
-gemspec 
+# gemspec 
 
-gem 'will_paginate', '~> 3.0.0'
-gem 'httparty'
+# gem 'will_paginate', '~> 3.0.0'
+# gem 'httparty'
 
