@@ -8,7 +8,7 @@ module Framey
   
   API_HOST = "http://framey.com"
   RUN_ENV = "production"
-  API_KEY = ""
-  SECRET = ""
+  API_KEY = "API_KEY_VALUE"
+  SECRET = "API_SECRET_VALUE"
   API_TIMEOUT = 15
 end
