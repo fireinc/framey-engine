@@ -20,9 +20,11 @@ otherwise in your Gemfile:
 `gem framey`
 
 Run the framey generator:
+
 `rails generate framey API_KEY API_SECRET`
 
 This automatically creates default views, controller and routes for recording and viewing videos, as well as the callback that framey.com pings with the video information:
+
 	/framey/videos
 	/framey/videos/new
 	/framey/videos/<video_id>
@@ -32,6 +34,7 @@ Create the supporting database tables:
 	rake db:migrate
 
 Edit the default configuration options in config/framey.rb:
+
 	API_HOST = "http://framey.com"
 	RUN_ENV = "production"
 	API_KEY = "API_KEY_VALUE"
