@@ -17,17 +17,9 @@ module Framey
           
           has_many :videos,  :class_name => 'Framey::Video'
 
-          include Cheese::ActsAsVideo::Base::InstanceMethods
+          include Framey::ActsAsVideo::Base::InstanceMethods
         end
       end
-      
-      module InstanceMethods
-        
-        def factory_name
-          "this is an example instance method"
-        end
-                
-      end # InstanceMethods      
     end
 
   end

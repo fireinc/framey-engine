@@ -1,7 +1,7 @@
 module Framey
   class VideosController < ApplicationController
 
-    # unloadable
+    unloadable
     
     layout 'framey'  # this allows you to have a gem-wide layout
     
