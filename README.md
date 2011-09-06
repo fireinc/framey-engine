@@ -45,7 +45,7 @@ Edit the default configuration options in config/framey.rb:
 * Your user visits that page and clicks record
 * If your user likes the video she just recorded, she clicks "Publish"
 * The user's video is processed and stored on the Framey servers.
-* After a little while, Framey emails you and/or pings your servers at a specified callback url with a url to the video file
+* Framey emails you and/or pings your servers at a specified callback url with a url to the video file
 * You can choose to store those urls on your end, or just the id of the Framey video to access it later on Framey via an API call
 * You then display the video to your user using either the Framey video player or your own favorite flash or HTML 5 video player
 
