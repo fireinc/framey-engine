@@ -16,7 +16,7 @@ module Framey
       timestamp, signature = Framey::Api.sign
       session_data = (opts[:session_data]||{}).map { |k,v| "#{k.to_s}=#{v.to_s}" }.join(",")
       run_env = Framey::RUN_ENV
-      max_time = opts[:max_time] || 30
+      max_time = opts[:max_time] || Framey::MAX_TIME
       divid = "frameyRecorderContainer_#{(rand*999999999).to_i}"
       objid = opts[:id] || "the#{divid}"
       

@@ -25,7 +25,7 @@ module Framey
     def self.make_request(method,url,params={})
       timestamp, signature = self.sign
       
-      params = params.merge({:time_stamp => timestamp, :signature => signature, :api_key => Framey.api_key})
+      params = params.merge({:time_stamp => timestamp, :signature => signature, :api_key => Framey::API_KEY})
       res = begin
         HTTParty.send(method,Framey::API_HOST + url,{:query => params}) 
       rescue SocketError => e

@@ -8,7 +8,7 @@ module Framey
 
     # Config defaults
     config.video_factory_name = "default factory name"
-    config.mount_at = '/'
+    config.mount_at = '/framey'
     
     # Load rake tasks
     rake_tasks do

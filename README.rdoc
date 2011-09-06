@@ -1,56 +1,140 @@
-== Overview
+# The Framey Ruby Gem
 
-One of the things I was most looking forward to in rails 3 was the plugin / engine architecture. Recently, I sat down to figure out how to create my first engine and package it up as a gem and it took me awhile of time just to get the structure of the engine setup. It's missing a lot of the "rails" you get in a normal rails app.
+This gem can be used for easy Rails integration with the Framey video recording service. See http://framey.com for more information.
 
-In it's simplest form engines are quite easy, however for a full-featured engine (such as creating a forum) there are a lot of extras that you're going to want. These are the things I spent time figuring out that I've packaged up into an easy starting point:
+# Dependencies:
 
-* Namespacing models & controllers so they don't collide with those in the main app
-* Creating a global layout within your engine that gets nested within your application layout
-* Generating migrations from your engine
-* Creating an "acts_as_[plugin]" declaration for use inside your main app's models
-* Easy plugin configuration file editable from main app directory
-* Rake tasks within engine
-* Writing tests for models complete with fixtures
-* Serving static assets within engine
-* Packaging and distributing as a gem
-* Code is here - I've created an engine stub that has all the things setup for you already. I want to see a lot more rails 3 engines get created, I hope this helps! I'd love to hear feedback from you if you try it out.
+* httparty (ruby gem)
+* will_paginate (ruby gem)
 
-Here’s how you get ready to create your first gem by using this starting point:
+# Installation
 
-* git clone http://github.com/krschacht/rails_3_engine_demo.git
-* cd rails_3_engine_demo
-* [edit test/database.yml]
-* rake test (this will initialize your test database and run the basic test suite)
+First, sign up at http://framey.com to get an API key and secret and to set your callback url. 
 
-Now, create a plain rails app and set it up to use your engine. FYI: even though the engine's directory is 'rails_3_engine_demo', internally the engine is named 'cheese'
+If not using bundler, do:
 
-* cd .. [ this is to take you outside the 'rails_3_engine_demo' directory that was created above' ]
-* rails new demo_app_to_use_gem -d mysql
-* cd demo_app_to_use_gem
-* [edit config/database.yml]
-* [edit Gemfile, add line: ] gem ‘cheese’, :path => "../rails_3_engine_demo"
-* rails generate cheese
-* [examine config/initializers/cheese.rb to see basic config parameters]
-* rake db:create
-* rake db:migrate (one of the migrations that you'll see run came from the engine)
+`gem install framey`
 
-You have now setup a empty rails app that utilizes your engine. To test out the functionality, startup the demo app’s webserver:
+otherwise in your Gemfile:
 
-* rails server
-* Then visit: http://localhost:3000/cheese (this is a controller included within the engine)
-* Watch the server logs as you're viewing this page and you'll see some output which is coming from an application before_filter which is executing from inside the engine (in lib/application_controller.rb)
-* rake cheese:report (this is a a rake task that is included inside the engine)
+`gem framey`
 
-Lastly, let's package up your engine as a real gem. You’ll need Jeweler installed for this:
+Run the framey generator:
+`rails generate framey API_KEY API_SECRET`
 
-* cd rails_3_engine_demo
-* sudo gem install jeweler
-* rake gemspec
-* rake build
-* rake install (you have now installed your engine as a gem locally)
-* [ At this point if you wanted your demo app to use your installed gem, edit the Gemfile in your demo app and remove the 'path' option from your gem line. It should look like this: ] gem ‘cheese’
-* rake gemcutter:release (this pushes your gem up to Gemcutter, a public gem repository)
+This automatically creates default views, controller and routes for recording and viewing videos, as well as the callback that framey.com pings with the video information:
+	/framey/videos
+	/framey/videos/new
+	/framey/videos/<video_id>
+	/framey/callback
 
-Now you’re ready to start customizing this engine for your own purposes. Do a global find in your engine directory and replace every instance of "cheese" and "Cheese" with your engine name (be sure to preserve capitalization). Likewise, rename every directory and file that’s named "cheese" with your engine name. I should really automate this but I haven’t figured out how to create a rake task that I can run from within the engine directory itself.
+Create the supporting database tables:
+	rake db:migrate
 
-P.S. Special thanks to Chrispy for helping figure out the application_controller includes!
+Edit the default configuration options in config/framey.rb:
+	API_HOST = "http://framey.com"
+	RUN_ENV = "production"
+	API_KEY = "API_KEY_VALUE"
+	SECRET = "API_SECRET_VALUE"
+	API_TIMEOUT = 15
+	MAX_TIME = 30
+
+# User / Development Flow
+
+* You make a page on your site that displays the Framey flash video recorder
+* Your user visits that page and clicks record
+* If your user likes the video she just recorded, she clicks "Publish"
+* The user's video is processed and stored on the Framey servers.
+* After a little while, Framey emails you and/or pings your servers at a specified callback url with a url to the video file
+* You can choose to store those urls on your end, or just the id of the Framey video to access it later on Framey via an API call
+* You then display the video to your user using either the Framey video player or your own favorite flash or HTML 5 video player
+
+# Usage
+
+
+To render the Framey video recorder in an ActionView (example assumes ERB) do:
+
+    <%= javascript_include_tag "swfobject" %>
+    <%= render_recorder({
+      :id => "myRecorder",             # id for the flash embed object (optional, random by default)
+      :max_time => 60,                 # maximum allowed video length in seconds (optional, defaults to 30)
+      :session_data => {               # custom parameters to be passed along to your app later (optional)
+        :user_id => <%= @user.id %>    # you may, for example, want to relate this recording to a specific user in your system
+      }
+    }) %>
+    
+When your user then views this recorder, records a video, and clicks "Publish", your app receives a POST to the specified callback url with the following parameters:
+
+    {
+      :video => {
+        :name => [video name],                      # this is the video's UUID within the Framey system
+        :filesize => [filesize],                    # the filesize in bytes of the video
+        :duration => [duration],                    # the duration of the video in seconds
+        :state => [state],                          # the state of the video, in this case "uploaded"
+        :views => [number of views],                # the number of times this video has been viewed, in this case 0
+        :data => [the data hash you specified],     # this is the exact data you specified in the :session_data hash when rendering the recorder
+        :flv_url => [video url],                    # url to the flash video file on framey that you can feed into a video player later
+        :mp4_url => [h.264 video url],              # url to the h.264 video file on framey that you can feed into a video player later
+        :large_thumbnail_url => [thumbnail url]     # url to the large thumbnail image that was generated for this video 
+        :medium_thumbnail_url => [thumbnail url]    # url to the medium thumbnail image that was generated for this video 
+        :small_thumbnail_url => [thumbnail url]     # url to the small thumbnail image that was generated for this video                 
+      }
+    } 
+    
+To render the Framey video player in an ActionView (example assumes ERB) do:
+
+    <%= javascript_include_tag "swfobject" %>
+    <%= render_player({
+      :id => "myPlayer",                    # id for the flash embed object (optional, random by default)
+      :video_url => "[video url]",          # the video url received in the callback (required)
+      :thumbnail_url => "[thumbnail url]",  # the thumbnail url received in the callback (required)
+      :progress_bar_color => "0x123456",    # the desired color for the progress bar (optional, defaults to black)
+      :volume_bar_color => "0x123456",      # the desired color for the volume bar (optional, defaults to black)
+    })%>
+    
+Note that you don't have to use the Framey video player, though, and can use any other flash video player you'd like.
+
+To get updated stats information about a given video, do:
+
+    @video = Framey::Api.get_video("[framey video name]")
+    
+This returns a simple Framey::Video object, like so:
+
+    #<Framey::Video:0x1037b4450 @state="uploaded", @filesize=123456, @name="c96323e0-54b1-012e-9d34-7c6d628c53d4", @large_thumbnail_url="http://framey.com/thumbnails/c96323e0-54b1-012e-9d34-7c6d628c53d4.jpg", @medium_thumbnail_url="http://framey.com/thumbnails/c96323e0-54b1-012e-9d34-7c6d628c53d4.jpg", @small_thumbnail_url="http://framey.com/thumbnails/c96323e0-54b1-012e-9d34-7c6d628c53d4.jpg", @data={"user_id" => 1}, @flv_url="http://framey.com/videos/source/c96323e0-54b1-012e-9d34-7c6d628c53d4/source.flv", @mp4_url="http://framey.com/videos/source/c96323e0-54b1-012e-9d34-7c6d628c53d4/source.mp4", @views=12, @duration=15.62>
+    
+To delete a video on Framey, do:
+
+    @video.delete!
+
+or:
+
+    Framey::Api.delete_video("[framey video name]")
+
+# Other Documentation
+
+* http://rubydoc.info/gems/framey/1.2.0/frames
+
+# License
+
+(The MIT License)
+
+Copyright (c) 2011 FIX
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
