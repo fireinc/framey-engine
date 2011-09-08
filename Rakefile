@@ -6,7 +6,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "framey"
     gem.summary = "A gem for easy Rails integration with the Framey video recording service."
-    gem.description = "TO DO"
+    gem.description = "A gem for easy Rails integration with the Framey video recording service."
     gem.email = "david@qlabs.com"
     gem.authors = ["Dave Renz"]
     gem.files = Dir["{lib}/**/*", "{app}/**/*", "{public}/**/*", "{config}/**/*"]

@@ -19,6 +19,10 @@ otherwise in your Gemfile:
 
 `gem framey`
 
+There are two options for using the framey gem: using included scaffold code for views, models and callbacks or creating your own views.  Depending on your choice, follow the appropriate instructions below to complete the installation. 
+
+## Using the included scaffold	
+
 Run the framey generator:
 
 `rails generate framey API_KEY API_SECRET`
@@ -31,6 +35,7 @@ This automatically creates default views, controller and routes for recording an
 	/framey/callback
 
 Create the supporting database tables:
+
 	rake db:migrate
 
 Edit the default configuration options in config/framey.rb:
@@ -41,6 +46,21 @@ Edit the default configuration options in config/framey.rb:
 	SECRET = "API_SECRET_VALUE"
 	API_TIMEOUT = 15
 	MAX_TIME = 30
+
+## Creating your own views
+
+Create a framey initializer at config/framey.rb and modify the following code to use your API keys
+	
+	module Framey
+	  API_HOST = "http://framey.com"
+	  RUN_ENV = "production"
+	  API_KEY = "API_KEY_VALUE"
+	  SECRET = "API_SECRET_VALUE"
+	  API_TIMEOUT = 15
+	  MAX_TIME = 30
+	end
+	
+
 
 # User / Development Flow
 

@@ -1,7 +1,5 @@
 module Framey
-
   module ViewHelpers
-    
     # This method renders the Framey video recorder from within an ActionView in your Rails app.
     #
     # Example Usage (assuming ERB):
@@ -14,11 +12,11 @@ module Framey
     #      }
     #    }) %>
     def render_recorder(opts={})
-      api_key = Framey.api_key
+      api_key = Framey::API_KEY
       timestamp, signature = Framey::Api.sign
       session_data = (opts[:session_data]||{}).map { |k,v| "#{k.to_s}=#{v.to_s}" }.join(",")
-      run_env = Framey.run_env
-      max_time = opts[:max_time] || 30
+      run_env = Framey::RUN_ENV
+      max_time = opts[:max_time] || Framey::MAX_TIME
       divid = "frameyRecorderContainer_#{(rand*999999999).to_i}"
       objid = opts[:id] || "the#{divid}"
       
@@ -94,9 +92,7 @@ raw <<END_PLAYER
 END_PLAYER
     end
   end
-  
 end
-
 module ActionView
   module Helpers
     include Framey::ViewHelpers
